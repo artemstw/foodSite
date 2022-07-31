@@ -61,19 +61,17 @@ window.addEventListener("DOMContentLoaded", () => {
         let days, hours, minutes, seconds;
         const t = Date.parse(endtime) - Date.parse(new Date());
 
-        if(t <=0) {
+        if (t <= 0) {
             days = 0;
             hours = 0;
             minutes = 0;
             seconds = 0;
+        } else {
+            (days = Math.floor(t / (1000 * 60 * 60 * 24))),
+                (hours = Math.floor((t / (1000 * 60 * 60)) % 24)),
+                (minutes = Math.floor((t / 1000 / 60) % 60)),
+                (seconds = Math.floor((t / 1000) % 60));
         }
-            else {
-                days = Math.floor(t / (1000 * 60 * 60 * 24)),
-                hours = Math.floor((t / (1000 * 60 * 60)) % 24),
-                minutes = Math.floor((t / 1000 / 60) % 60),
-                seconds = Math.floor((t / 1000) % 60);
-            }
-
 
         return {
             total: t,
@@ -123,4 +121,63 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     setClock(".timer", deadline);
+
+    //Modal
+
+    const modalTrigger = document.querySelectorAll("[data-modal]"),
+        modal = document.querySelector(".modal"),
+        modalCloseBtn = document.querySelector("[data-close]");
+
+    function openModal() {
+        modal.classList.add("show");
+        modal.classList.remove("hide");
+        document.body.style.overflow = "hidden"; //Фиксируем страницу, чтобы она не скроллилась
+        // при открытом модальном окне.
+        clearInterval(modalTimerId);
+    }
+
+    modalTrigger.forEach((btn) => {
+        btn.addEventListener("click", openModal);
+    });
+
+    //Создаем отдельную функцию для закрытия модального окна, чтобы не повторять код.
+
+    function closeModal() {
+        modal.classList.add("hide");
+        modal.classList.remove("show");
+        document.body.style.overflow = "";
+    }
+
+    modalCloseBtn.addEventListener("click", closeModal);
+
+    //Реализуем функционал, чтобы модальное окно закрывалось при клике на "подложку" или нажатии на клавишу Esc.
+
+    modal.addEventListener("click", (e) => {
+        const target = e.target;
+        if (target && target.matches(".modal")) {
+            closeModal();
+        }
+    });
+
+    //Делаем так, чтобы модальное окно закрывалось с помощью нажатия Esc.
+
+    document.addEventListener("keydown", (e) => {
+        if (e.code === "Escape" && modal.classList.contains("show")) {
+            closeModal();
+        }
+    });
+
+    //Модальное окно появляется, когда пользователь прокрутил страницу до конца.
+
+    const modalTimerId = setTimeout(openModal, 8000);
+
+    function showModalByScroll() {
+           if (window.pageYOffset + document.documentElement.clientHeight >=
+            document.documentElement.scrollHeight - 1) {
+            openModal();
+            window.removeEventListener("scroll", showModalByScroll);
+        }
+    }
+
+    window.addEventListener("scroll", showModalByScroll);
 });
