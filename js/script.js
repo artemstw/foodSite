@@ -125,8 +125,7 @@ window.addEventListener("DOMContentLoaded", () => {
     //Modal
 
     const modalTrigger = document.querySelectorAll("[data-modal]"),
-        modal = document.querySelector(".modal"),
-        modalCloseBtn = document.querySelector("[data-close]");
+        modal = document.querySelector(".modal");
 
     function openModal() {
         modal.classList.add("show");
@@ -148,13 +147,14 @@ window.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = "";
     }
 
-    modalCloseBtn.addEventListener("click", closeModal);
-
     //Реализуем функционал, чтобы модальное окно закрывалось при клике на "подложку" или нажатии на клавишу Esc.
 
     modal.addEventListener("click", (e) => {
         const target = e.target;
-        if (target && target.matches(".modal")) {
+        if (
+            (target && target.matches(".modal")) ||
+            target.getAttribute("data-close") === ""
+        ) {
             closeModal();
         }
     });
@@ -169,7 +169,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     //Модальное окно появляется, когда пользователь прокрутил страницу до конца.
 
-    const modalTimerId = setTimeout(openModal, 15000);
+    const modalTimerId = setTimeout(openModal, 50000);
 
     function showModalByScroll() {
         if (
@@ -264,7 +264,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const forms = document.querySelectorAll("form");
 
     const message = {
-        loading: "Идёт загрузка...",
+        loading: "img/form/spinner.svg",
         success: "Спасибо, скоро мы свяжемся с вами!",
         failure: "Oops! Что-то пошло не так...",
     };
@@ -281,10 +281,14 @@ window.addEventListener("DOMContentLoaded", () => {
             //Необходимо убрать это поведение.
             e.preventDefault();
 
-            const statusMessage = document.createElement("div");
-            statusMessage.classList.add("status");
-            statusMessage.textContent = message.loading;
-            form.append(statusMessage);
+            const statusMessage = document.createElement("img");
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+
+            form.insertAdjacentElement("afterend", statusMessage);
 
             const request = new XMLHttpRequest();
             request.open("POST", "server.php");
@@ -304,15 +308,47 @@ window.addEventListener("DOMContentLoaded", () => {
             request.addEventListener("load", () => {
                 if (request.status === 200) {
                     console.log(request.response);
-                    statusMessage.textContent = message.success;
+                    showThanksModal(message.success);
                     form.reset();
-                    setTimeout(() => {
-                        statusMessage.remove();
-                    }, 2000);
+                    statusMessage.remove();
                 } else {
-                    statusMessage.textContent = message.failure;
+                    showThanksModal(message.failure);
                 }
             });
         });
+    }
+
+    //Создаем красивое оповещение пользователя
+
+    function showThanksModal(message) {
+        const previousModalDialog = document.querySelector(".modal__dialog");
+
+        previousModalDialog.classList.add("hide"); //Скрываем элемент при помощи стилей.
+
+        //Теперь нам нужно снова открыть модельное окно и вручнуюсформировать структуру внутри.
+        openModal();
+
+        //Создаем блок-обертку.
+        const thanksModal = document.createElement("div");
+        thanksModal.classList.add("modal__dialog");
+
+        //Теперь переходим к формированию верстки в этом модальном окне.
+        thanksModal.innerHTML = `
+            <div class='modal__content'>
+                <div class='modal__close' data-close>×</div>
+                <div class='modal__title'>${message}</div>
+            </div>
+        `;
+
+        document.querySelector(".modal").append(thanksModal); //Размещаем элемент на странице.
+
+        //Реализуем функционал, чтобы блок в модалке исчезал, и пользователь снова мог ввести свои данные
+        //в модальном окне.
+        setTimeout(() => {
+            thanksModal.remove();
+            previousModalDialog.classList.add("show");
+            previousModalDialog.classList.remove("hide");
+            closeModal();
+        }, 4000);
     }
 });
