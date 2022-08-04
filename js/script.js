@@ -360,4 +360,53 @@ window.addEventListener('DOMContentLoaded', () => {
 	fetch('http://localhost:3000/menu')
 		.then((data) => data.json()) //Берем data - ответ от сервера и превращаем в обычный JS-объект.
 		.then((res) => console.log(res));
+
+	//Slider
+
+	const slides = document.querySelectorAll('.offer__slide'), //Количество слайдов на странице.
+		prev = document.querySelector('.offer__slider-prev'),
+		next = document.querySelector('.offer__slider-next'),
+		total = document.querySelector('#total'), //Количество слайдов.
+		current = document.querySelector('#current'); //Текущий слайд.
+
+	let slideIndex = 1; //Определяет текущее положение в слайдере.
+
+	showSlides(slideIndex);
+
+	if (slides.length < 10) {
+		total.textContent = `0${slides.length}`;
+	} else {
+		total.textContent = slides.length;
+	}
+
+	function showSlides(n) {
+		if (n > slides.length) {
+			slideIndex = 1;
+		}
+		if (n < 1) {
+			slideIndex = slide.length;
+		}
+
+		slides.forEach((item) => (item.style.display = 'none'));
+
+		slides[slideIndex - 1].style.display = 'block';
+
+		if (slides.length < 10) {
+			current.textContent = `0${slideIndex}`;
+		} else {
+			current.textContent = slideIndex;
+		}
+	}
+
+	function plusSlides(n) {
+		showSlides((slideIndex += n));
+	}
+
+	prev.addEventListener('click', () => {
+		plusSlides(-1);
+	});
+
+	next.addEventListener('click', () => {
+		plusSlides(1);
+	});
 });
