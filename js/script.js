@@ -33,15 +33,13 @@ window.addEventListener('DOMContentLoaded', () => {
 	hideTabContent();
 	showTabContent();
 
-	// Используем делегирование событий, чтобы навесить событие клика на родительский элемент,
-	// обязательно передаём объект-событие event.
+	// Используем делегирование событий, чтобы навесить событие клика на родительский элемент, обязательно передаём объект-событие event.
 
 	tabsParent.addEventListener('click', (event) => {
 		const target = event.target;
 		if (target && target.matches('.tabheader__item')) {
 			tabs.forEach((item, i) => {
-				//Если тот элемент, в который мы кликнули, будет совпадать с элементом, который мы сейчас перебираем
-				//в цикле forEach, мы вызываем две наши функции.
+				//Если тот элемент, в который мы кликнули, будет совпадать с элементом, который мы сейчас перебираем в цикле forEach, мы вызываем две наши функции.
 				if (target === item) {
 					hideTabContent();
 					showTabContent(i);
@@ -54,8 +52,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	const deadline = '2022-08-08';
 
-	//Создаем функцию, которая определяет разницу между дедлайном и текущим временем.
-	//Задача этой функции - получить разницу между датами.
+	//Создаем функцию, которая определяет разницу между дедлайном и текущим временем. Задача этой функции - получить разницу между датами.
 
 	function getTimeRemaining(endtime) {
 		let days, hours, minutes, seconds;
@@ -271,8 +268,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	//Создаем отдельную функцию для общения с сервером с помощью fuction Expression.
 
 	const postData = async (url, data) => {
-		//Когда мы вызываем функцию postData, мы передаем в качестве аргумента url,
-		// который передается дальше в fetch. И также нам надо передать data, то есть, данные, которые будут поститься в этой функции.
+		//Когда мы вызываем функцию postData, мы передаем в качестве аргумента url, который передается дальше в fetch. И также нам надо передать data, то есть, данные, которые будут поститься в этой функции.
 		const res = await fetch(url, {
 			method: 'POST',
 			headers: {
@@ -288,8 +284,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	function bindPostData(form) {
 		form.addEventListener('submit', (e) => {
-			//Перезагрузка страницы при отправке формы - стандартное поведение браузера.
-			//Необходимо убрать это поведение.
+			//Перезагрузка страницы при отправке формы - стандартное поведение браузера. Необходимо убрать это поведение.
 			e.preventDefault();
 
 			const statusMessage = document.createElement('img');
@@ -303,8 +298,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 			const formData = new FormData(form);
 
-			//Сначала превращаем formData в массив массивов с помощью метода entries(),
-			//После этого превращаем ее в классический объект, потом этот объект превращаем в JSON.
+			//Сначала превращаем formData в массив массивов с помощью метода entries(), после этого превращаем ее в классический объект, потом этот объект превращаем в JSON.
 			const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
 			postData('http://localhost:3000/requests', json)
@@ -364,49 +358,152 @@ window.addEventListener('DOMContentLoaded', () => {
 	//Slider
 
 	const slides = document.querySelectorAll('.offer__slide'), //Количество слайдов на странице.
+		slider = document.querySelector('.offer__slider'),
 		prev = document.querySelector('.offer__slider-prev'),
 		next = document.querySelector('.offer__slider-next'),
 		total = document.querySelector('#total'), //Количество слайдов.
-		current = document.querySelector('#current'); //Текущий слайд.
+		current = document.querySelector('#current'), //Текущий слайд.
+		slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+		slidesField = document.querySelector('.offer__slider-inner'), //Внутренняя обертка.
+		width = window.getComputedStyle(slidesWrapper).width;
 
 	let slideIndex = 1; //Определяет текущее положение в слайдере.
-
-	showSlides(slideIndex);
+	let offset = 0; //Определяет отступ вправо или влево, чтобы показывать слайд.
 
 	if (slides.length < 10) {
 		total.textContent = `0${slides.length}`;
+		current.textContent = `0${slideIndex}`;
 	} else {
 		total.textContent = slides.length;
+		current.textContent = slideIndex;
 	}
 
-	function showSlides(n) {
-		if (n > slides.length) {
+	slidesField.style.width = 100 * slides.length + '%';
+	slidesField.style.display = 'flex';
+	slidesField.style.transition = '0.5s all';
+
+	slidesWrapper.style.overflow = 'hidden';
+
+	slides.forEach((slide) => {
+		slide.style.width = width;
+	});
+
+	slider.style.position = 'relative';
+
+	const indicators = document.createElement('ol'), //Создаем большую обертку для всех точек на сладере и стилизуем ее.
+		dots = [];
+	indicators.classList.add('carousel-indicators');
+	indicators.style.cssText = `
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        display: flex;
+        justify-content: center;
+        margin-right: 15%;
+        margin-left: 15%;
+        list-style: none;
+    `;
+	slider.append(indicators);
+
+	for (let i = 0; i < slides.length; i++) {
+		const dot = document.createElement('li');
+		dot.setAttribute('data-slide-to', i + 1);
+		dot.style.cssText = `
+            box-sizing: content-box;
+            flex: 0 1 auto;
+            width: 30px;
+            height: 6px;
+            margin-right: 3px;
+            margin-left: 3px;
+            cursor: pointer;
+            background-color: #fff;
+            background-clip: padding-box;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            opacity: .5;
+            transition: opacity .6s ease;
+        `;
+
+		if (i === 0) {
+			dot.style.opacity = 1;
+		}
+
+		indicators.append(dot);
+		dots.push(dot);
+	}
+
+	next.addEventListener('click', () => {
+		if (
+			offset ===
+			+width.slice(0, width.length - 2) * (slides.length - 1)
+		) {
+			offset = 0;
+		} else {
+			offset += +width.slice(0, width.length - 2); //Когда мы нажимаем стрелочку "вперед", к offset добавляется ширина еще одного слайда.
+		}
+
+		slidesField.style.transform = `translateX(-${offset}px)`;
+
+		if (slideIndex === slides.length) {
 			slideIndex = 1;
+		} else {
+			slideIndex++;
 		}
-		if (n < 1) {
-			slideIndex = slide.length;
-		}
-
-		slides.forEach((item) => (item.style.display = 'none'));
-
-		slides[slideIndex - 1].style.display = 'block';
 
 		if (slides.length < 10) {
 			current.textContent = `0${slideIndex}`;
 		} else {
 			current.textContent = slideIndex;
 		}
-	}
 
-	function plusSlides(n) {
-		showSlides((slideIndex += n));
-	}
-
-	prev.addEventListener('click', () => {
-		plusSlides(-1);
+		dots.forEach((dot) => (dot.style.opacity = '.5'));
+		dots[slideIndex - 1].style.opacity = 1;
 	});
 
-	next.addEventListener('click', () => {
-		plusSlides(1);
+	prev.addEventListener('click', () => {
+		if (offset === 0) {
+			offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+		} else {
+			offset -= +width.slice(0, width.length - 2); //Когда мы нажимаем стрелочку "вперед", к offset добавляется ширина еще одного слайда.
+		}
+
+		slidesField.style.transform = `translateX(-${offset}px)`;
+
+		if (slideIndex === 1) {
+			slideIndex = slides.length;
+		} else {
+			slideIndex--;
+		}
+
+		if (slides.length < 10) {
+			current.textContent = `0${slideIndex}`;
+		} else {
+			current.textContent = slideIndex;
+		}
+
+		dots.forEach((dot) => (dot.style.opacity = '.5'));
+		dots[slideIndex - 1].style.opacity = 1;
+	});
+
+	dots.forEach((dot) => {
+		dot.addEventListener('click', (e) => {
+			const target = e.target;
+			const slideTo = target.getAttribute('data-slide-to');
+
+			slideIndex = slideTo;
+			offset = +width.slice(0, width.length - 2) * (slideTo - 1);
+			slidesField.style.transform = `translateX(-${offset}px)`;
+
+			if (slides.length < 10) {
+				current.textContent = `0${slideIndex}`;
+			} else {
+				current.textContent = slideIndex;
+			}
+
+			dots.forEach((dot) => (dot.style.opacity = '.5'));
+			dots[slideIndex - 1].style.opacity = 1;
+		});
 	});
 });
