@@ -1,0 +1,22 @@
+{
+  "name": "foodsite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artemstw/foodSite.git"
+  },
+  "author": "Artem Stawetski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artemstw/foodSite/issues"
+  },
+  "homepage": "https://github.com/artemstw/foodSite#readme",
+  "devDependencies": {
+    "json-server": "^0.17.0"
+  }
+}

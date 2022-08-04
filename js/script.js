@@ -353,4 +353,8 @@ window.addEventListener('DOMContentLoaded', () => {
 			closeModal();
 		}, 4000);
 	}
+
+	fetch('http://localhost:3000/menu')
+		.then((data) => data.json()) //Берем data - ответ от сервера и превращаем в обычный JS-объект.
+		.then((res) => console.log(res));
 });
